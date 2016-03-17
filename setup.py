@@ -6,10 +6,10 @@ from setuptools import setup, find_packages
 
 
 setupdict = dict(
-   name='mkcrow',
+   name='mkcrowbar',
    version='0.1.0',
    description='Setup a crowbar instance',
-   url='https://github.com/felixsch/mkcrow',
+   url='https://github.com/felixsch/mkcrowbar',
    # Author details
    author='Felix Schnizlein',
    author_email='felix@schnizle.in',
@@ -34,7 +34,7 @@ setupdict = dict(
    },
    entry_points={
         'console_scripts': [
-            'mkcrow=mkcrow:main',
+            'mkcrowbar=mkcrowbar:main',
         ],
     },
 )

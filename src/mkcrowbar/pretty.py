@@ -9,21 +9,22 @@ def say(msg):
    print(colors.light_gray | msg)
 
 def fatal(msg, exit=127):
-   print(colors.red | "Fatal:{}".format(msg))
-   sys.exit(exit)
+   print(colors.red | "  Fatal: {}".format(msg))
+   if exit:
+      sys.exit(exit)
 
 def warn(msg):
-   print(colors.red | "Warn: {}".format(msg))
+   print(colors.red | "  Warn: {}".format(msg))
 
 def info(msg):
-   print(colors.blue | "Info: {}".format(msg))
+   print(colors.blue | "  Info: {}".format(msg))
 
 
 class spinner(object):
    def __init__(self, message):
       self.message = message
       self.running = Event()
-      self.sign    = colors.light_red | '✗'
+      self.sign = colors.light_green | '✓'
       self.thread  = Thread(target=self.run_spinner)
       self.steps   = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
 
@@ -36,13 +37,20 @@ class spinner(object):
       self.running.clear()
       self.thread.join()
 
-   def success(self):
-      self.sign = colors.light_green | '✓'
+   def success(self, msg=None):
       self.running.clear()
+      self.thread.join()
+      if msg:
+         print(colors.light_gray | '      :: {}'.format(msg))
 
-
-   def fail(self):
+   def fail(self, msg=None, exit=127):
+      self.sign    = colors.light_red | '✗'
       self.running.clear()
+      self.thread.join()
+      if msg:
+         print(colors.light_red | '      !! {}'.format(msg))
+         if exit:
+            sys.exit(exit)
 
    def run_spinner(self):
       i = 0
