@@ -5,6 +5,8 @@ from plumbum          import cli, colors, local
 from mkcrowbar        import pretty, network, zypper, MkCrowbar
 from mkcrowbar.pretty import say, warn, info, fatal
 
+from time import sleep
+
 
 
 @MkCrowbar.subcommand('install')
@@ -21,15 +23,10 @@ class InstallCrowbar(cli.Application):
          self.set_hostname()
 
       # ip
-      say('Configure ip adress...')
-      if not self.check_ip() and self.config['network']:
-         self.set_ip()
-         print('')
-         info('You need to reboot to make sure ip configuration is now working.')
-         info('Restart the script after reboot...')
-         sys.exit(0)
-
-
+      say('Configure ip adress...') 
+      iface = self.config.get('interface', 'eth0')
+      if not self.check_ip(iface) and self.config['network']:
+         self.set_ip(iface)
 
       # use SUSEConnect or add repositories manually
       say('Enable sources for installation...')
@@ -39,8 +36,11 @@ class InstallCrowbar(cli.Application):
          self.enable_media()
 
 
-   def check_ip(self):
-      iface = self.config['network'].get('interface', 'eth0')
+      say('Install basic requirements for running crowbar...')
+      self.install_packages()
+
+
+   def check_ip(self, iface):
       addr  = network.iface_has_ipv4_addr(iface)
  
       if addr != self.config['network']['ipaddr']:
@@ -68,12 +68,23 @@ class InstallCrowbar(cli.Application):
       return True
 
 
-   def set_ip(self):
-     with pretty.spinner('Setting static ip address') as s:
-        network.iface_set_static_addr(self.config['interface'], self.config['network'])
+   def set_ip(self, iface):
+     # reconfigure interface
+     with pretty.spinner('Setting static ip address for interface {}'.format(iface)) as s:
+
+        s.note('Reconfigure interface...')
+        network.iface_set_static_addr(iface, self.config['network'])
         
+        s.note('Stop interface...')
+        if not network.iface_stop(iface):
+           s.fail('Could not shutdown interface...')
 
+        s.note('Start interface...')
+        if not network.iface_start(iface):
+           s.fail('Could not apply changes to interface {}'.format(iface))
 
+        s.success('Successfully changed settings for {}'.format(iface))
+     
    def set_hostname(self):
       with pretty.spinner('Setting hostname') as s:
          if not network.set_hostname(self.config['hostname']):
@@ -86,7 +97,42 @@ class InstallCrowbar(cli.Application):
 
 
    def enable_media(self):
-      pass
+      with pretty.spinner('Enable media') as s:
+         # Add sources
+         for alias, repo in self.config.get('install-media', {}).items():
+            
+            status = zypper.repo_enable(repo, alias)
+
+            if status[0] == 0:
+               s.note('Enable {}... [done]'.format(alias))
+            elif status[0] == 4:
+               s.note('Enable {}... [already exists]'.format(alias))
+            else:
+               s.fail('Adding repository failed', exit=False)
+               pretty.fatal(status[2])
+
+         s.note('Refresh zypper database')
+         status = zypper.refresh()
+
+         if not status[0] == 0:
+            s.fail('Could not refresh database... ({})'.format(status[2]))
+
+         s.success('Media/Repositories successfully enabled')
+
+   def install_packages(self):
+     with pretty.spinner('Install required packages...') as s:
+        status = zypper.install(['crowbar'])
+        if not status[0] == 0:
+           s.fail('Could not install required packages!', exit=False)
+           pretty.warn(status[1])
+
+           if status[0] == 4:
+              pretty.fatal('Dependency problems occured. Check your media/sources..')
+           if status[0] == 104:
+              pretty.fatal('Could not find required packages. Checkour your media/sources..')
+
+        s.success('Installed packages successfully')
+
 
 
 

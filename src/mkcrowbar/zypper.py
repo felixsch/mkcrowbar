@@ -16,8 +16,8 @@ def repo_exists(repo):
    except ValueError:
       return False
 
-def repo_enable(repo):
-   enable_repo = cmd('ar', repo)
+def repo_enable(repo, alias):
+   enable_repo = cmd('ar', repo, alias)
    return enable_repo.run(retcode=None)
 
 
@@ -26,4 +26,6 @@ def refresh():
    return refresh.run(retcode=None)
 
 
-
+def install(packages):
+   install = cmd('in', *packages)
+   return install.run(retcode=None)
