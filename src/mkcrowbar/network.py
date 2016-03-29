@@ -83,11 +83,11 @@ def iface_uses_dhcp(iface):
   return False
 
 
-def hostname():
+def hostname(*args):
   """
     Get the current hostname
   """
-  return local['hostname']().strip()
+  return local['hostname'][list(args)]().strip()
 
 
 def set_hostname(new):
@@ -109,3 +109,16 @@ def is_qualified_hostname(hostname):
   if not is_domain.match(hostname):
     return False
   return True
+
+ 
+def add_to_hosts(ip, fqdn):
+  """
+    Add hostname to /etc/hosts if not already exists
+  """
+  with open('/etc/hosts', 'r+') as hdl:
+    if fqdn in hdl.read():
+      return -1
+    hdl.write('{ip} {fqdn} {name}\n'.format(ip   = ip,
+                                            fqdn = fqdn,
+                                            name = fqdn.split('.')[0]))
+    return 0

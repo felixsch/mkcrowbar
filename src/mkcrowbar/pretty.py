@@ -69,14 +69,14 @@ class step(object):
 
    def fail(self, message, exit=False):
       self.stop()
-      self.print(self.SIGN_FAIL, colors.light_red | message, self.indent + 2)
+      self.print(colors.light_red | '==>', colors.light_red | message, self.indent + 2)
       if exit:
          sys.exit(exit)
 
 
    def success(self, message):
       self.stop()
-      self.print(self.SIGN_OK, colors.light_green | message, self.indent + 2)
+      self.print(colors.light_green | '==>', colors.light_green | message, self.indent + 2)
 
 
    def substep(self, message):
@@ -84,7 +84,7 @@ class step(object):
 
 
    def __enter__(self):
-      self.print('', self.title, 0)
+      self.print('', self.title + '...', 0)
       return self
 
 
