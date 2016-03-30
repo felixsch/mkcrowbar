@@ -4,6 +4,8 @@ import re
 import os
 import time
 
+import pdb
+
 
 def iface_has_ipv4_addr(iface):
   """
@@ -122,3 +124,27 @@ def add_to_hosts(ip, fqdn):
                                             fqdn = fqdn,
                                             name = fqdn.split('.')[0]))
     return 0
+
+
+def has_running_firewall():
+  """
+    Check if iptables shows other rules than -P <STREAM>
+  """
+  local.env['LANG'] = "C"
+  iptables = local['iptables']['-S']
+  output   = iptables().strip().split('\n')
+  filtered = filter(lambda l: not l.startswith('-P'), output)
+  lines    = list(filtered)
+
+  if len(lines):
+    return True
+  return False
+
+
+def is_domain_name_reachable(fqdn):
+  ping   = local['ping']['-c', '1', fqdn]
+  status = ping.run(retcode=None)
+
+  if status[0] != 0:
+    return False
+  return True

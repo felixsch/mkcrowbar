@@ -8,6 +8,7 @@ import yaml
 
 class MkCrowbar(cli.Application):
    verbose      = cli.Flag(['-v', '--verbose'], help = 'Show verbose output')
+   interactive  = cli.Flag(['--non-interactive'], help = 'Non interactive output', default=True)
 
    def main(self, *args):
       if args or not self.nested_command:
@@ -52,10 +53,5 @@ class MkCrowbar(cli.Application):
             fatal("Configuration option '{}' is mandatory. Please update your configuration".format(key))
 
          
-      
-
-
-
-
 def main():
    sys.exit(MkCrowbar.run())

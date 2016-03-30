@@ -33,7 +33,7 @@ class step(object):
 
    SPINNER_STEPS   = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
 
-   def __init__(self, title, indent=0):
+   def __init__(self, title, indent=0, interactive=True):
       self.title        = title
       self.current      = title
       self.current_note = None
@@ -41,6 +41,7 @@ class step(object):
       self.running      = Event()
       self.running_task = False
       self.indent       = indent
+      self.interactive  = interactive
 
 
    def task(self, desc):
@@ -51,7 +52,7 @@ class step(object):
       self.current = desc
       self.running_task = True
 
-      if not self.running.is_set():
+      if not self.running.is_set() and self.interactive:
          self.running.set()
          self.thread.start()
 
@@ -67,7 +68,7 @@ class step(object):
       self.print(self.SIGN_OK, self.current, self.indent + 2, desc)
 
 
-   def fail(self, message, exit=False):
+   def fail(self, message, exit=1):
       self.stop()
       self.print(colors.light_red | '==>', colors.light_red | message, self.indent + 2)
       if exit:

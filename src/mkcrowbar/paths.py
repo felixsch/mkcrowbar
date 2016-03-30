@@ -12,3 +12,9 @@ def crowbar_json(name, git_install=False):
 
    return path + name + '.json'
 
+def crowbar_chef_templates(name):
+   path = '/opt/dell/chef/data_bags/crowbar/bc-template-'
+   
+   return path + name + '.json'
+
+
