@@ -17,8 +17,19 @@ def repo_exists(repo):
         return False
 
 
-def repo_enable(repo, alias):
-    enable_repo = cmd('ar', repo, alias)
+def repo_enable(repo, alias=None, settings=None):
+    args = ['ar']
+
+    if settings:
+        for option, value in settings.items():
+            args += ['--' + option, value]
+
+    args += [repo]
+
+    if alias:
+        args += [alias]
+
+    enable_repo = cmd(*args)
     return enable_repo.run(retcode=None)
 
 

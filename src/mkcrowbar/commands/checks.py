@@ -52,6 +52,8 @@ class PostInstallChecks(cli.Application):
 
             s.task('Validate crowbar network configuration')
             status = crowbar.network_config_valid(addr)
+            if status is None:
+                s.fail('Could not find network-json-validator. Maybe you missed to run mkcrowbar install <config>')
             if status[0] != 0:
                 s.fail('Could not validate network crowbar network configuration', exit=False)
                 s.fail(status[1])

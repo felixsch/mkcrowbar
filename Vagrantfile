@@ -5,6 +5,12 @@ Vagrant.configure('2') do |config|
     domain.memory = 4096
     domain.cpus   = 2
   end
-  config.vm.synced_folder ".", "/mkcrow", type: "nfs"
+  config.vm.synced_folder ".", "/mkcrowbar", type: "nfs"
   config.vm.network "private_network", ip: "192.168.124.10"
+
+  config.vm.provision :shell, inline: <<-SHELL
+    echo "cd /mkcrowbar" >> /home/vagrant/.bashrc
+    echo "sudo su"       >> /home/vagrant/.bashrc
+  SHELL
+
 end

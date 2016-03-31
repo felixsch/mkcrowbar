@@ -2,6 +2,8 @@ from plumbum          import cli
 from mkcrowbar        import pretty, network, zypper, MkCrowbar
 from mkcrowbar.pretty import say, info, fatal
 
+import pdb
+
 
 @MkCrowbar.subcommand('prepare')
 class Prepare(cli.Application):
@@ -29,7 +31,7 @@ class Prepare(cli.Application):
         else:
             self.enable_media()
 
-        info('Your host is no prepared for crowbar.')
+        info('Your host is now prepared for crowbar.')
         info('You can now run mkcrowbar install <config>.')
 
     def check_ip(self, iface):
@@ -79,23 +81,38 @@ class Prepare(cli.Application):
             s.task("Setting hostname via hostname")
             if not network.set_hostname(self.config['hostname']):
                 s.fail('Could not set hostname.')
-                s.task('Adding ip to /etc/hosts')
-                status = network.add_to_hosts(self.config['network']['ipaddr'], self.config['hostname'])
-                if status == -1:
-                    s.done('Already exists')
-                elif status == 0:
-                    s.done()
-                else:
-                    s.fail('Could not add entry to /etc/hosts')
-                    s.success('Hostname successfully changed')
+
+            s.task('Adding ip to /etc/hosts')
+            status = network.add_to_hosts(self.config['network']['ipaddr'], self.config['hostname'])
+            if status == -1:
+                s.done('Already exists')
+            elif status == 0:
+                s.done()
+            else:
+                s.fail('Could not add entry to /etc/hosts')
+                s.success('Hostname successfully changed')
 
     def enable_media(self):
         with pretty.step('Enable media') as s:
             # Add sources
-            for alias, repo in self.config.get('install-media', {}).items():
+            for item in self.config.get('install-media', []):
 
-                s.task('Enable {}...'.format(alias))
-                status = zypper.repo_enable(repo, alias)
+                # extended source definition
+                if isinstance(item, dict):
+                    if len(item) > 1:
+                        s.fail('Invalid syntax in configuration file. One settings definition per source')
+                    for alias, settings in item.items():
+                        if 'repo' not in settings:
+                            s.fail('{} has no repo set. Please update your configuration'.format(alias))
+
+                        repo = settings.pop('repo', None)
+                        settings = settings
+
+                        s.task('Enable {}...'.format(alias))
+
+                        status = zypper.repo_enable(repo, alias, settings)
+                else:
+                    status = zypper.repo_enable(item)
 
                 if status[0] == 0:
                     s.done('done')

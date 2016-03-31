@@ -89,7 +89,11 @@ def hostname(*args):
     """
         Get the current hostname
     """
-    return local['hostname'][list(args)]().strip()
+    status = local['hostname'][list(args)].run(retcode=None)
+
+    if status[0] != 0:
+        fatal('Hostname failed due: {}'.format(status[2]))
+    return status[1].strip()
 
 
 def set_hostname(new):
