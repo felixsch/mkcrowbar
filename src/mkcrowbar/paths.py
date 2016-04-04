@@ -16,3 +16,14 @@ def crowbar_json(name, git_install=False):
 def crowbar_chef_templates(name):
     path = '/opt/dell/chef/data_bags/crowbar/bc-template-'
     return path + name + '.json'
+
+
+def crowbar_installer():
+    return '/opt/dell/bin/install-chef-suse.sh'
+
+
+def repository_path(version, repository):
+    base = '/srv/tftpboot/' + version + '/'
+    if repository == 'install':
+        return base + 'install'
+    return base + 'repos/' + repository

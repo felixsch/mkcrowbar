@@ -1,6 +1,6 @@
-from plumbum          import cli
-from mkcrowbar        import pretty, zypper, MkCrowbar
-from mkcrowbar.pretty import say
+from plumbum import cli
+from mkcrowbar import zypper, MkCrowbar
+from mkcrowbar.pretty import step, say, fatal
 
 
 @MkCrowbar.subcommand('install')
@@ -10,12 +10,13 @@ class InstallCrowbar(cli.Application):
 
     def main(self, conf):
         self.config = self.parent.load_configuration(conf)
+        self.interactive = self.parent.interactive
 
         say('Install basic requirements for running crowbar...')
         self.install_packages()
 
     def install_packages(self):
-        with pretty.step('Install required packages') as s:
+        with self.step('Install required packages') as s:
             s.task('refresh zypper database')
             status = zypper.refresh()
 
@@ -26,11 +27,14 @@ class InstallCrowbar(cli.Application):
             status = zypper.install(['crowbar', 'crowbar-core'])
             if not status[0] == 0:
                 s.fail('Could not install required packages!', exit=False)
-                pretty.warn(status[1])
+                warn(status[1])
 
             if status[0] == 4:
-                pretty.fatal('Dependency problems occured. Check your media/sources..')
+                fatal('Dependency problems occured. Check your media/sources..')
             if status[0] == 104:
-                pretty.fatal('Could not find required packages. Checkour your media/sources..')
+                fatal('Could not find required packages. Check your your media/sources..')
 
             s.success('Installed packages successfully')
+
+    def step(self, message):
+        return step(message, interactive=self.interactive)
