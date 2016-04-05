@@ -1,0 +1,92 @@
+# example-env.yaml
+# Specify a fully qualified hostname for the admin node
+hostname: crowbar.suse.com
+
+# Specify which network interface to use for the admin network
+interface: eth1
+# network configuration for the crowbar host. You can set settings according to
+# the Interface Configuration Files. 
+# HINT: If you want to use ipv6, you need to set NETWORKING_IPV6 in /etc/sysconfig/network
+network:
+    ipaddr: 192.168.124.10                      
+    broadcast: 192.168.124.255
+    mtu: 1500
+    netmask: 255.255.255.0
+    #ipv6init: yes
+    #ipv6addr: 2607:f0d0:1002:0011:0000:0000:0000:0002
+    #ipv6_defaultgw: 2607:f0d0:1002:0011:0000:0000:0000:0001
+
+
+# Configure repositories for crowbar via SUSEConnect
+use-connect: false
+# You need to add required regcodes unless you alread registered
+# the host
+# products:
+#   - regcode
+#   - regcode
+#   - regcode
+
+
+# Configure repositories via zyppera
+use-zypper: true
+# Define installation medias from where to install crowbar
+# - <URL>.repo
+# or if not repo file available:
+# - alias:
+#     repo : URL | path
+#     type : yast2 | rpm-md | plaindir
+#     ... (all settings vailable in zypper)
+install-media:
+    - https://repo/url/to/product.repo
+    - https://repo/url/to/another/product/you/want/to/activate.repo
+    - some-rpm-md-repo:
+        repo: URL or path to device/mount
+
+# Extra components to install
+# Currently supported: core (installed anyway), ceph, ha, hyperv, openstack
+crowbar-components:
+  - core
+  - ceph
+
+# TFTP repositories which should be available from crowbar within the network
+# various modes are available:
+# nfs - Mount repository data as a nfs share
+#   name: <name>                Name of the repository (e.g install)
+#   type: nfs                   Nfs mount
+#   version: <version>          Server version (e.g suse-12.1 or suse-12.0)
+#   source: <nfs server share>  Source of the nfs share
+#   fstab: true | false         Add a line to /etc/fstab to automatically mount nfs share
+#
+# createrepo - Create a empty repo (for use with SUSE Manager)
+#   NOTE: You need to sign the repository manually
+#   name: <name>                Name of the repository (e.g install)
+#   type: createrepo            Create empty repository
+#   version <version>           Server version (e.g suse-12.1 or suse.12.0)
+#   tag: <tag>                  Tag for this repository (optional)
+
+# For a correct installation you minimal configuration should provide a install repository,
+# the pool and update repository for your server version and the product repository (cloud or storage)
+repositories:
+  - name: install
+    type: nfs
+    version: suse-12.0
+    source: somehost:/data/repos/sle-12/dvd1
+    fstab: true
+
+  - name: Cloud
+    type: nfs
+    version: suse-12.0
+    source: somehost:/data/repos/cloud-6/dvd1
+    fstab: true
+
+  - name: SLES12-Pool
+    type: nfs
+    version: suse-12.0
+    source: somehost:/data/repos/sle-12-pool
+    fstab: true
+
+  - name: SLES12-Updates
+    type: nfs
+    version: suse-12.0
+    source: somehost:/data/repos/sle-12-update
+    fstab: true

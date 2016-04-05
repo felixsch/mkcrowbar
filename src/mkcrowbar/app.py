@@ -2,17 +2,26 @@ import os
 import sys
 
 from plumbum import cli, colors
-from mkcrowbar import commands, base
+from mkcrowbar import commands, config
 
 
-class MkCrowbar(base.App):
+class MkCrowbar(cli.Application):
 
-    def exec(self):
+    verbose = cli.Flag(['-v', '--verbose'], help='Show verbose output')
+    interactive = cli.Flag(['--non-interactive'], help='Non interactive output', default=True)
+
+    def main(self, conf=None):
+
         self.check_privileges()
-        self.register_commands()
+
+        # run all steps
+        if conf and not self.nested_command:
+            self.config = config.load(conf)
+            self.config_path = conf
+            return self.run_all()
 
         if not self.nested_command:
-            return self.run_all()
+            return self.help()
 
     def check_privileges(self):
         user = os.getenv('SUDO_USER')
@@ -22,8 +31,13 @@ class MkCrowbar(base.App):
             print(colors.light_red | 'This programm requires root to run correctly')
             sys.exit(1)
 
-    def register_commands(self):
-        pass
+    def flags(self):
+        f = []
+        if not self.interactive:
+            f += ['--non-interactive']
+        if self.verbose:
+            f += ['--verbose']
+        return f
 
     def run_all(self):
         schedule = [commands.Prepare, commands.Install, commands.Checks, commands.Setup]
