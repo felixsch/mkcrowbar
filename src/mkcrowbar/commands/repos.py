@@ -1,19 +1,14 @@
 import os
+import shutil
 
-from plumbum import cli, local
-from mkcrowbar import MkCrowbar, zypper, paths
-from mkcrowbar.pretty import step
+from plumbum import local
+from mkcrowbar import zypper, paths, base
 
 
-@MkCrowbar.subcommand('repos')
-class SetupRepositories(cli.Application):
-    SUBCOMMAND_HELPMSG = False
+class SetupRepositories(base.App):
     DESCRIPTION = 'Initialize crowbar repositories'
 
-    def main(self, conf):
-        self.interactive = self.parent.interactive
-        self.config = self.parent.load_configuration(conf)
-
+    def exec(self):
         with self.step('Enable crowbar repositories') as s:
             repos = self.config.get('repositories', {})
 
@@ -39,9 +34,6 @@ class SetupRepositories(cli.Application):
                 else:
                     s.fail('Unknown repository type. Check your configuration')
 
-    def step(self, message):
-        return step(message, interactive=self.interactive)
-
     def mount_nfs(self, step, repo):
         name = repo['name']
         version = repo['version']
@@ -66,7 +58,29 @@ class SetupRepositories(cli.Application):
         pass
 
     def create_repo(self, step, repo):
-        pass
+        version = repo['version']
+        name = repo['name']
+        path = paths.repository_path(version, name)
+        args = [path]
+
+        if os.path.exists(os.path.join(path, 'repodata')):
+            step.note('Remove old repo..')
+            shutil.rmtree(path)
+
+        step.note('Creating directory')
+        os.makedirs(path)
+
+        step.note('Initialize repo')
+
+        # Add repo tags if available
+        if 'tag' in repo:
+            args += ['--repo', repo['tag']]
+
+        status = local['createrepo'][args].run(retcode=None)
+
+        if status[0] != 0:
+            step.fail('Could not create repository for {}'.format(name))
+        step.done('Repository created')
 
     def has_repo_name(self, repo_name):
         repo_names = [repo['name'] for repo in self.config.get('repositories')]

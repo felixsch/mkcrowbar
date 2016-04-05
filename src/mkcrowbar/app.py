@@ -1,22 +1,18 @@
-from plumbum           import cli, colors
-from mkcrowbar.pretty  import fatal
-
 import os
 import sys
-import yaml
+
+from plumbum import cli, colors
+from mkcrowbar import commands, base
 
 
-class MkCrowbar(cli.Application):
-    verbose      = cli.Flag(['-v', '--verbose'], help='Show verbose output')
-    interactive  = cli.Flag(['--non-interactive'], help='Non interactive output', default=True)
+class MkCrowbar(base.App):
 
-    def main(self, *args):
-        if args or not self.nested_command:
-            fatal('Unknown or no command given', exit=False)
-            self.help()
-            return 1
-
+    def exec(self):
         self.check_privileges()
+        self.register_commands()
+
+        if not self.nested_command:
+            return self.run_all()
 
     def check_privileges(self):
         user = os.getenv('SUDO_USER')
@@ -26,30 +22,22 @@ class MkCrowbar(cli.Application):
             print(colors.light_red | 'This programm requires root to run correctly')
             sys.exit(1)
 
-    def load_configuration(self, path=None):
-        if not path:
-            path = os.environ.get('MKCROWBAR_CONFIG')
+    def register_commands(self):
+        pass
 
-        if not path:
-            fatal('You need to specify a configuration file')
+    def run_all(self):
+        schedule = [commands.Prepare, commands.Install, commands.Checks, commands.Setup]
+        for command in schedule:
+            (_, ret) = command.invoke(self.config_path, *self.flags())
+            if ret:
+                sys.exit(ret)
 
-        if not os.path.isfile(path):
-            fatal('Could not open configuration file (No such file)')
 
-        try:
-            self.config = yaml.safe_load(open(path))
-            self.validate_configuration()
-        except yaml.scanner.ScannerError as e:
-            fatal('Parsing configuration file failed: {}'.format(e))
-
-        return self.config
-
-    def validate_configuration(self):
-        required = ['hostname', 'interface', 'network']
-
-        for key in required:
-            if key not in self.config:
-                fatal("Configuration option '{}' is mandatory. Please update your configuration".format(key))
+# Register all commands to mkcrowbar
+MkCrowbar.subcommand('prepare', commands.Prepare)
+MkCrowbar.subcommand('install', commands.Install)
+MkCrowbar.subcommand('checks', commands.Checks)
+MkCrowbar.subcommand('setup', commands.Setup)
 
 
 def main():

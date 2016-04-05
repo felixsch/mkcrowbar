@@ -1,26 +1,16 @@
-from plumbum import cli
-
-from mkcrowbar import network, crowbar, MkCrowbar
-from mkcrowbar.pretty import say, step
+from mkcrowbar import network, crowbar, base
+from mkcrowbar.pretty import say
 
 
-@MkCrowbar.subcommand('check')
-class PostInstallChecks(cli.Application):
-    SUBCOMMAND_HELPMSG = False
+class Checks(base.App):
     DESCRIPTION = 'Check if everything is ready to bootstrap crowbar'
 
-    def main(self, conf):
-        self.interactive = self.parent.interactive
-        self.config = self.parent.load_configuration(conf)
-
+    def exec(self):
         iface = self.config.get('interface', 'eth0')
 
         say('Performing sanity checks')
         self.check_fqdn()
         self.check_ip_addrs(iface)
-
-    def step(self, message):
-        return step(message, interactive=self.interactive)
 
     def check_fqdn(self):
         with self.step('Check hostname and domain settings') as s:

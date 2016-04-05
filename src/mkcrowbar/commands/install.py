@@ -1,17 +1,11 @@
-from plumbum import cli
-from mkcrowbar import zypper, MkCrowbar
-from mkcrowbar.pretty import step, say, fatal
+from mkcrowbar import zypper, base
+from mkcrowbar.pretty import say, fatal, warn
 
 
-@MkCrowbar.subcommand('install')
-class InstallCrowbar(cli.Application):
-    SUBCOMMAND_HELPMSG = False
-    DESCRIPTION        = 'Install crowbar on this maschine'
+class Install(base.App):
+    DESCRIPTION = 'Install crowbar on this maschine'
 
-    def main(self, conf):
-        self.config = self.parent.load_configuration(conf)
-        self.interactive = self.parent.interactive
-
+    def exec(self):
         say('Install basic requirements for running crowbar...')
         self.install_packages()
 
@@ -35,6 +29,3 @@ class InstallCrowbar(cli.Application):
                 fatal('Could not find required packages. Check your your media/sources..')
 
             s.success('Installed packages successfully')
-
-    def step(self, message):
-        return step(message, interactive=self.interactive)

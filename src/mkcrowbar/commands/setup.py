@@ -1,19 +1,14 @@
 import subprocess
 import os
 
-from plumbum import cli
-from mkcrowbar import MkCrowbar, paths
-from mkcrowbar.pretty import fatal, step
+from mkcrowbar import paths, base
+from mkcrowbar.pretty import fatal
 
 
-@MkCrowbar.subcommand('setup')
-class Setup(cli.Application):
-    SUBCOMMAND_HELPMSG = False
+class Setup(base.App):
     DESCRIPTION = 'Configure crowbar'
 
-    def main(self, conf):
-        self.interactive = self.parent.interactive
-
+    def exec(self):
         if not os.path.exists(paths.crowbar_installer()):
             fatal('Could not find the installer', exit=False)
             fatal('Maybe you missed to prepare the environment before running setup')
@@ -38,7 +33,3 @@ class Setup(cli.Application):
                             break
                         s.fail(desc, exit=False)
                     s.fail('Installation aborted.')
-
-    def step(self, message):
-        return step(message, interactive=self.interactive)
-

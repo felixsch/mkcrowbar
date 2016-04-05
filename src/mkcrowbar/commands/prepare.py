@@ -1,17 +1,11 @@
-from plumbum          import cli
-from mkcrowbar        import pretty, network, zypper, MkCrowbar
+from mkcrowbar import network, zypper, base
 from mkcrowbar.pretty import say, info, fatal
 
-import pdb
 
-
-@MkCrowbar.subcommand('prepare')
-class Prepare(cli.Application):
+class Prepare(base.App):
     DESCRIPTION        = 'Prepare host for crowbar installation'
-    SUBCOMMAND_HELPMSG = False
 
-    def main(self, conf):
-        self.config = self.parent.load_configuration(conf)
+    def exec(self):
 
         # hostname
         say('Configure hostname...')
@@ -61,7 +55,7 @@ class Prepare(cli.Application):
 
     def set_ip(self, iface):
         # reconfigure interface
-        with pretty.step('Setting static ip address for interface {}'.format(iface)) as s:
+        with self.step('Setting static ip address for interface {}'.format(iface)) as s:
 
             s.task('Reconfigure interface...')
             network.iface_set_static_addr(iface, self.config['network'])
@@ -77,7 +71,7 @@ class Prepare(cli.Application):
             s.success('Successfully changed settings for {}'.format(iface))
 
     def set_hostname(self):
-        with pretty.step('Setting hostname') as s:
+        with self.step('Setting hostname') as s:
             s.task("Setting hostname via hostname")
             if not network.set_hostname(self.config['hostname']):
                 s.fail('Could not set hostname.')
@@ -93,7 +87,7 @@ class Prepare(cli.Application):
                 s.success('Hostname successfully changed')
 
     def enable_media(self):
-        with pretty.step('Enable media') as s:
+        with self.step('Enable media') as s:
             # Add sources
             for item in self.config.get('install-media', []):
 
@@ -120,7 +114,7 @@ class Prepare(cli.Application):
                     s.done('already exists')
                 else:
                     s.fail('Adding repository failed', exit=False)
-                    pretty.fatal(status[2])
+                    fatal(status[2])
 
             s.task('Refresh zypper database')
             status = zypper.refresh()
