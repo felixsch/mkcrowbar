@@ -18,7 +18,12 @@ class Install(base.App):
                 s.fail('Could not refresh zypper database', 1)
 
             s.task('Installing basic crowbar packages')
-            status = zypper.install(['crowbar', 'crowbar-core'])
+
+            packages = ['crowbar', 'crowbar-core']
+            if len(self.config.get('crowbar-components', [])):
+                packages += ["crowbar-" + comp for comp in self.config.get('crowbar-components')]
+
+            status = zypper.install(packages)
             if not status[0] == 0:
                 s.fail('Could not install required packages!', exit=False)
                 warn(status[1])
@@ -29,3 +34,5 @@ class Install(base.App):
                 fatal('Could not find required packages. Check your your media/sources..')
 
             s.success('Installed packages successfully')
+
+
