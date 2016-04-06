@@ -2,7 +2,7 @@ import subprocess
 import os
 
 from mkcrowbar import paths, base
-from mkcrowbar.pretty import fatal
+from mkcrowbar.pretty import fatal, say
 
 
 class Setup(base.App):
@@ -21,15 +21,24 @@ class Setup(base.App):
             for output in process.stdout:
                 line = output.decode('utf-8').strip()
 
+                self.show(line)
+
                 if line.startswith('==='):
                     s.task(line[4:])
                 if line.startswith('Error:'):
                     s.fail(line, exit=False)
+                    self.premature_error(s, process)
+                if line.startswith('Crowbar installation terminated prematurely.'):
+                    s.fail('Installer script failed unexpected. Try run mkcrowbar --verbose to see what happend')
 
-                    # Show the complete error
-                    for description in process.stdout:
-                        desc = description.decode('utf-8').strip()
-                        if desc.startswith('Crowbar installation terminated prematurely.'):
-                            break
-                        s.fail(desc, exit=False)
-                    s.fail('Installation aborted.')
+
+
+    def premature_error(self, step, process):
+        for description in process.stdout:
+            desc = description.decode('utf-8').strip()
+            if desc.startswith('Crowbar installation terminated prematurely.'):
+                break
+            step.fail(desc, exit=False)
+
+        step.fail('Installation aborted.')
+

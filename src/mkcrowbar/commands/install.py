@@ -19,7 +19,7 @@ class Install(base.App):
 
             s.task('Installing basic crowbar packages')
 
-            packages = ['crowbar', 'crowbar-core']
+            packages = ['crowbar', 'crowbar-core', 'sqlite3']
             if len(self.config.get('crowbar-components', [])):
                 packages += ["crowbar-" + comp for comp in self.config.get('crowbar-components')]
 

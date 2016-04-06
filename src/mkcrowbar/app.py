@@ -12,6 +12,9 @@ class MkCrowbar(cli.Application):
 
     def main(self, conf=None):
 
+        if self.verbose:
+            self.interactive = False
+
         self.check_privileges()
 
         # run all steps
@@ -31,18 +34,24 @@ class MkCrowbar(cli.Application):
             print(colors.light_red | 'This programm requires root to run correctly')
             sys.exit(1)
 
+
+    # This makes definitly no sense but plumbum inverses the default value
+    # wenn a flag value is set. So we only need to set the key if we want to
+    # trigger the flag.
     def flags(self):
-        f = []
-        if not self.interactive:
-            f += ['--non-interactive']
+        f = {}
         if self.verbose:
-            f += ['--verbose']
+            f['verbose'] = True
+        if self.interactive:
+            f['interactive'] = True
         return f
 
+
+
     def run_all(self):
-        schedule = [commands.Prepare, commands.Install, commands.Checks, commands.Setup]
+        schedule = [commands.Prepare, commands.Install, commands.Checks, commands.Repos, commands.Setup]
         for command in schedule:
-            (_, ret) = command.invoke(self.config_path, *self.flags())
+            (_, ret) = command.invoke(self.config_path, **self.flags())
             if ret:
                 sys.exit(ret)
 
@@ -51,6 +60,7 @@ class MkCrowbar(cli.Application):
 MkCrowbar.subcommand('prepare', commands.Prepare)
 MkCrowbar.subcommand('install', commands.Install)
 MkCrowbar.subcommand('checks', commands.Checks)
+MkCrowbar.subcommand('repos', commands.Repos)
 MkCrowbar.subcommand('setup', commands.Setup)
 
 

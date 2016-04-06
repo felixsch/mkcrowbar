@@ -5,7 +5,7 @@ from plumbum import local
 from mkcrowbar import zypper, paths, base
 
 
-class SetupRepositories(base.App):
+class Repos(base.App):
     DESCRIPTION = 'Initialize crowbar repositories'
 
     def exec(self):
@@ -35,24 +35,36 @@ class SetupRepositories(base.App):
                     s.fail('Unknown repository type. Check your configuration')
 
     def mount_nfs(self, step, repo):
-        name = repo['name']
-        version = repo['version']
         mount = local['mount']
+        umount = local['umount']
+        path = paths.repository_path(repo['version'], repo['name'])
 
-        if not os.path.exists(paths.repository_path(version, name)):
+        if not os.path.exists(path):
             step.note('Creating directory')
-            os.makedirs(paths.repository_path(version, name))
+            os.makedirs(path)
+
+        step.note('Check directory')
+        if os.listdir(path):
+            step.note('Is not empty unmounting')
+            status = umount[path].run(retcode=None)
+
+            # umount failed
+            if status[0] != 0:
+                step.fail(status[2].strip(), exit=False)
+                step.fail('Could not umount {}. Please fix before proceeding'.format(path))
+
+            # check if directory is really empty
+            if os.listdir(path):
+                step.fail('Mountpoint {} is not empty. Check before proceed'.format(path))
 
         step.note('Mounting the repository')
 
-        mount_nfs = mount['-t', 'nfs', repo['source'], paths.repository_path(version, name)]
+        mount_nfs = mount['-t', 'nfs', repo['source'], path]
         status = mount_nfs.run(retcode=None)
 
-        if status[0] == 32:
-            step.done('Already mounted or busy')
-        elif status[0] != 0:
-            step.fail(status[2].strip(), exit=False)
-            step.fail('Could not mount nfs share')
+        if status[0] != 0:
+            step.fail('Could not mount nfs share!', exit=False)
+            step.fail(status[2].strip())
 
     def rsync_repo(self, step, repo):
         pass
