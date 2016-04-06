@@ -1,5 +1,5 @@
 # mkcrowbar — Easy crowbar installation on SUSE hosts
-A unofficial installation script for the crowbar project on modern SUSE based hosts (SLES >= 12).
+A __unofficial__ installation script for the crowbar project on modern SUSE based hosts (SLES >= 12).
 It bootstraps crowbar and makes neccessary preperations (configure network, enable repositories)
 
 ## Installation
