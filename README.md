@@ -32,6 +32,7 @@ Subcommands:
     checks                 Check if everything is ready to bootstrap crowbar
     install                Install crowbar on this maschine
     prepare                Prepare host for crowbar installation
+    repos                  Configures the install repos for crowbar clients
     setup                  bootstrap and configure crowbar
 ```
 You can run all steps at one by omitting the subcommand
@@ -46,12 +47,19 @@ The complete installation environment is defined in a yaml file.
 _NOTE:_ This example file can be found in `examples`
 
 ```
+# The SUSE product your want to install
+product: storage
+
 # example-env.yaml
 # Specify a fully qualified hostname for the admin node
 hostname: crowbar.suse.com
 
+# Sets the timezone if the timezone is not yet set
+timezone: Europe/Berlin
+
 # Specify which network interface to use for the admin network
 interface: eth1
+
 # network configuration for the crowbar host. You can set settings according to
 # the Interface Configuration Files. 
 # HINT: If you want to use ipv6, you need to set NETWORKING_IPV6 in /etc/sysconfig/network
@@ -89,7 +97,7 @@ install-media:
     - https://repo/url/to/another/product/you/want/to/activate.repo
     - some-rpm-md-repo:
         repo: URL or path to device/mount
-    
+
 # Extra components to install
 # Currently supported: core (installed anyway), ceph, ha, hyperv, openstack
 crowbar-components:
@@ -120,19 +128,19 @@ repositories:
     version: suse-12.0
     source: somehost:/data/repos/sle-12/dvd1
     fstab: true
-    
+
   - name: Cloud
     type: nfs
     version: suse-12.0
     source: somehost:/data/repos/cloud-6/dvd1
     fstab: true
-    
+
   - name: SLES12-Pool
     type: nfs
     version: suse-12.0
     source: somehost:/data/repos/sle-12-pool
     fstab: true
-    
+
   - name: SLES12-Updates
     type: nfs
     version: suse-12.0

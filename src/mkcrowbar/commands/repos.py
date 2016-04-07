@@ -38,14 +38,14 @@ class Repos(base.App):
         mount = local['mount']
         umount = local['umount']
         path = paths.repository_path(repo['version'], repo['name'])
+        self.show('Installing in path = {}'.format(path))
 
         if not os.path.exists(path):
             step.note('Creating directory')
             os.makedirs(path)
 
         step.note('Check directory')
-        if os.listdir(path):
-            step.note('Is not empty unmounting')
+        if self.is_mounted(path):
             status = umount[path].run(retcode=None)
 
             # umount failed
@@ -60,11 +60,21 @@ class Repos(base.App):
         step.note('Mounting the repository')
 
         mount_nfs = mount['-t', 'nfs', repo['source'], path]
+        self.show(str(mount_nfs))
         status = mount_nfs.run(retcode=None)
 
         if status[0] != 0:
             step.fail('Could not mount nfs share!', exit=False)
             step.fail(status[2].strip())
+
+    def is_mounted(self, path):
+        mountpoint = local['mountpoint'][path]
+        self.show("checking if mounted: {}".format(mountpoint))
+        status = mountpoint.run(retcode=None)
+
+        if status[0] == 0:
+            return True
+        return False
 
     def rsync_repo(self, step, repo):
         pass

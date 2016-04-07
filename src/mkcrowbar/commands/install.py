@@ -1,5 +1,5 @@
 from mkcrowbar import zypper, base
-from mkcrowbar.pretty import say, fatal, warn
+from mkcrowbar.pretty import say, fatal
 
 
 class Install(base.App):
@@ -18,21 +18,45 @@ class Install(base.App):
                 s.fail('Could not refresh zypper database', 1)
 
             s.task('Installing basic crowbar packages')
+            s.note('This takes a while')
 
-            packages = ['crowbar', 'crowbar-core', 'sqlite3']
-            if len(self.config.get('crowbar-components', [])):
-                packages += ["crowbar-" + comp for comp in self.config.get('crowbar-components')]
+            (install, remove) = self.select_packages()
 
-            status = zypper.install(packages)
+            self.show('installing packages = {}'.format(install))
+
+            status = zypper.install(install)
             if not status[0] == 0:
                 s.fail('Could not install required packages!', exit=False)
-                warn(status[1])
+                s.fail(status[1])
 
             if status[0] == 4:
                 fatal('Dependency problems occured. Check your media/sources..')
             if status[0] == 104:
                 fatal('Could not find required packages. Check your your media/sources..')
 
-            s.success('Installed packages successfully')
+            s.done('Installed packages successfully')
 
+            s.task('Removing conflicting packages')
+            self.show("Removing packages = {}".format(remove))
+            status = zypper.remove(remove)
 
+            if not status[0] == 0:
+                s.fail('Could not remove conflicting packages', exit=False)
+                s.fail(status[1])
+            s.done('Conflicting packages removed')
+
+    def select_packages(self):
+        install = ['crowbar', 'sqlite3', 'crowbar-core', 'ntp']
+        remove = []
+
+        if self.config['installation'] == 'storage':
+            install += ['crowbar-ses', 'patterns-ses-admin']
+            remove += ['syslog-ng']
+
+        if self.config['installation'] == 'cloud':
+            install += ['patterns-cloud-admin']
+
+        if len(self.config.get('crowbar-components', [])):
+            install += ["crowbar-" + comp for comp in self.config.get('crowbar-components')]
+
+        return (install, remove)

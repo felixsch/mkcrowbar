@@ -55,6 +55,9 @@ class step(object):
 
     def note(self, note):
         self.current_note = note
+        if not self.interactive:
+            self.print('    :: ', note)
+
 
     def done(self, desc=None):
         self.running_task = False
@@ -62,8 +65,6 @@ class step(object):
         if self.interactive:
             self.up(1)
             self.print(self.SIGN_OK, self.current, self.indent + 2, desc)
-        else:
-            self.print(colors.light_green | "'==>" , 'done', self.indent + 2, desc)
 
     def fail(self, message, exit=1):
         self.stop()

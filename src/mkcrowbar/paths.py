@@ -22,8 +22,12 @@ def crowbar_installer():
     return '/opt/dell/bin/install-chef-suse.sh'
 
 
+def crowbar_installer_state(state):
+    return '/var/lib/crowbar/install/crowbar-install-' + state
+
+
 def repository_path(version, repository):
     base = '/srv/tftpboot/' + version + '/'
     if repository == 'install':
-        return base + 'install'
+        return base + 'x86_64/install'
     return base + 'repos/' + repository

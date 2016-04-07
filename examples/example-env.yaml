@@ -1,9 +1,16 @@
+# The SUSE product your want to install
+product: storage
+
 # example-env.yaml
 # Specify a fully qualified hostname for the admin node
 hostname: crowbar.suse.com
 
+# Sets the timezone if the timezone is not yet set
+timezone: Europe/Berlin
+
 # Specify which network interface to use for the admin network
 interface: eth1
+
 # network configuration for the crowbar host. You can set settings according to
 # the Interface Configuration Files. 
 # HINT: If you want to use ipv6, you need to set NETWORKING_IPV6 in /etc/sysconfig/network

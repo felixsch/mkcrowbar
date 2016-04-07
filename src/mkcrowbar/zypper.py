@@ -41,3 +41,7 @@ def refresh():
 def install(packages):
     install = cmd('in', *packages)
     return install.run(retcode=None)
+
+def remove(packages):
+    install = cmd('rm', *packages)
+    return install.run(retcode=None)
