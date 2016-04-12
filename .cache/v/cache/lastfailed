@@ -1,0 +1,6 @@
+{
+  "tests/test_pretty.py::test_done_interactive": true,
+  "tests/test_pretty.py::test_note": true,
+  "tests/test_pretty.py::test_step_task": true,
+  "tests/test_pretty.py::test_step_task_interactive": true
+}

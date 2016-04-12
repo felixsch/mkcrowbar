@@ -26,8 +26,8 @@ def crowbar_installer_state(state):
     return '/var/lib/crowbar/install/crowbar-install-' + state
 
 
-def repository_path(version, repository):
-    base = '/srv/tftpboot/' + version + '/'
+def repository_path(version, repository, arch='x86_64'):
+    base = '/srv/tftpboot/' + version + '/' + arch + '/'
     if repository == 'install':
-        return base + 'x86_64/install'
+        return base + 'install'
     return base + 'repos/' + repository

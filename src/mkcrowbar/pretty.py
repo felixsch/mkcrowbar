@@ -10,13 +10,13 @@ def say(msg):
 
 
 def fatal(msg, exit=127):
-    print(colors.red | "  Fatal: {}".format(msg))
+    print(colors.red | "  Fatal: {}".format(msg), file=sys.stderr)
     if exit:
         sys.exit(exit)
 
 
 def warn(msg):
-    print(colors.red | "  Warn: {}".format(msg))
+    print(colors.red | "  Warning: {}".format(msg), file=sys.stderr)
 
 
 def info(msg):
@@ -57,7 +57,6 @@ class step(object):
         self.current_note = note
         if not self.interactive:
             self.print('    :: ', note)
-
 
     def done(self, desc=None):
         self.running_task = False
@@ -109,7 +108,13 @@ class step(object):
     def up(self, n):
         print("\033[{}F".format(n), end="", flush=True)
 
-    def print(self, sign, message, indent=None, note=None):
+    def print(self, sign, message, indent=0, note=None, out=sys.stdout):
+        erase = ''
+
+        # only erase up 2 rows if in interactive mode
+        if self.interactive:
+            erase = '\033[2K'
+
         if not indent:
             indent = self.indent
 
@@ -118,5 +123,9 @@ class step(object):
         else:
             note = ''
 
-        print("\033[2K{indent}{sign} {message} {note}"
-                .format(indent=" " * indent, sign=sign, message=message, note=note), flush=True)
+        output = {'erase': erase,
+                  'indent': " " * indent,
+                  'sign': sign,
+                  'message': message,
+                  'note': note}
+        print("{erase}{indent}{sign} {message} {note}".format(**output), flush=True, file=out)
