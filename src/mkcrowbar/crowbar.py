@@ -1,10 +1,7 @@
 import os
 
-from unittest import mock
-from plumbum.machines.local import local
 from mkcrowbar import paths
-
-import pdb
+from plumbum.machines.local import local
 
 def network_config_valid(ipv4):
 

@@ -1,32 +1,29 @@
-import sys
-from unittest import mock
 from mkcrowbar import crowbar
+
 import fake
 
-@mock.patch('plumbum.local', "fooobbbabababa")
-@mock.patch('plumbum.machines.local', "fooobbbabababa")
-@mock.patch('plumbum.machines.local', fake.LocalModule())
 def test_network_config_valid(monkeypatch):
 
+    local = fake.LocalCommands()
+    monkeypatch.setattr('mkcrowbar.crowbar.local', local)
+    monkeypatch.setattr('os.path.exists', lambda x: True)
+
+    def has_admin_ip(*args):
+        if "--admin-ip" not in args:
+            raise RuntimeError('Could not find admin-ip argument.')
+
+    # everything is normal
+    local.has('/opt/dell/bin/network-json-validator', fake.returnOk(expect=has_admin_ip))
+
+    (code, _, _) = crowbar.network_config_valid('127.0.0.1')
+
+    assert code is 0
 
 
-    # chef templates exists
-    # monkeypatch.setattr('os.path.exists', lambda _: True)
+    # network-json-validator does not exist
 
-
-    monkeypatch.setattr('plumbum.machines.local', fake.LocalModule())
-    sys.modules['plumbum.machines.local'] = "WAAAAAA"
-
-
-
-
-
-
-
-
+    local.has('/opt/dell/bin/network-json-validator', fake.raiseError(FileNotFoundError('stub')))
+    
     ret = crowbar.network_config_valid('127.0.0.1')
 
-    assert ret is True
-
-    # chef templates do not exits
-    pass
+    assert ret is None

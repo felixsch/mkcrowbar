@@ -1,6 +1,7 @@
 plumbum
 PyYAML
 pytest
+pytest-cov
 mock
 tox
 
