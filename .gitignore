@@ -7,3 +7,4 @@ dist
 .ropeproject
 .cache
 htmlcov
+.coverage

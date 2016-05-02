@@ -14,7 +14,6 @@ def test_network_config_valid(monkeypatch):
 
     # everything is normal
     local.has('/opt/dell/bin/network-json-validator', fake.returnOk(expect=has_admin_ip))
-
     (code, _, _) = crowbar.network_config_valid('127.0.0.1')
 
     assert code is 0
