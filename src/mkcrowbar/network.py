@@ -11,10 +11,7 @@ def iface_has_ipv4_addr(iface):
         Read the ipv4 address from the ip command
     """
     ip    = local['ip']['-f', 'inet', 'addr', 'show', iface]
-    lines = ip().split('\n')
-    if not len(lines) > 2:
-        return None
-    match = re.search(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', lines[1])
+    match = re.search(r'inet (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', ip())
 
     if not match:
         warn('Can not read ip address from `ip` command. This inidicates a bug!')

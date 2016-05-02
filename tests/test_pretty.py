@@ -2,9 +2,6 @@ from pytest import raises
 
 from mkcrowbar import pretty
 
-import pdb
-import time
-
 
 def test_say(capsys):
     pretty.say('foo')

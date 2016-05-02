@@ -1,28 +1,22 @@
 from mkcrowbar import crowbar
 
-import fake
+from fake import LocalCommands, has_args, return_ok, raise_error
+
+validator = '/opt/dell/bin/network-json-validator'
+
 
 def test_network_config_valid(monkeypatch):
 
-    local = fake.LocalCommands()
+    local = LocalCommands()
     monkeypatch.setattr('mkcrowbar.crowbar.local', local)
     monkeypatch.setattr('os.path.exists', lambda x: True)
 
-    def has_admin_ip(*args):
-        if "--admin-ip" not in args:
-            raise RuntimeError('Could not find admin-ip argument.')
-
     # everything is normal
-    local.has('/opt/dell/bin/network-json-validator', fake.returnOk(expect=has_admin_ip))
+    local.has(validator, has_args(['--admin-ip'], return_ok()))
     (code, _, _) = crowbar.network_config_valid('127.0.0.1')
-
     assert code is 0
 
-
     # network-json-validator does not exist
-
-    local.has('/opt/dell/bin/network-json-validator', fake.raiseError(FileNotFoundError('stub')))
-    
+    local.has(validator, raise_error(FileNotFoundError('stub')))
     ret = crowbar.network_config_valid('127.0.0.1')
-
     assert ret is None

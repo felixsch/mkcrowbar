@@ -1,28 +1,22 @@
 from functools import partial
 from mkcrowbar import zypper
 
-import fake
+from fake import LocalCommand, LocalCommands, has_args, return_ok
 
 
-def stub_cmd(expected, *args):
-    for expect in expected:
-        if expect not in args:
-            raise RuntimeError("""
-                               zypper.cmd called without `{arg}`...
-                               Call was: zypper {commands}
-                               """.format(arg=expect, commands=" ".join(args)))
-    return fake.LocalCommand('zypper', fake.returnOk())
+def stub_cmd(required, *args):
+    cmd = LocalCommand('zypper', has_args(required, return_ok()))
+    cmd[args]
+    return cmd
 
 
 def test_cmd(monkeypatch):
-    local = fake.LocalCommands()
+    local = LocalCommands()
     monkeypatch.setattr('mkcrowbar.zypper.local', local)
 
-    def non_interactive_args(*args):
-        if '--non-interactive' not in args or '--no-gpg-checks' not in args:
-            raise RuntimeError('Missing args: --non-interactive or --no-gpg-checks')
+    args = ['--non-interactive', '--no-gpg-checks']
 
-    local.has('zypper', fake.returnOk(expect=non_interactive_args))
+    local.has('zypper', has_args(args, return_ok()))
 
     update = zypper.cmd('update')
 
@@ -31,7 +25,7 @@ def test_cmd(monkeypatch):
     assert code is 0
 
 
-def test_repo_exists(monkeypatch):
+def test_repo_exists():
     ret = zypper.repo_exists('http://download.opensuse.org/tumbleweed/repo/oss/')
     assert ret is True
 
@@ -80,29 +74,3 @@ def test_remove(monkeypatch):
     monkeypatch.setattr('mkcrowbar.zypper.cmd', partial(stub_cmd, ['rm', 'foo']))
     (code, _, _) = zypper.remove(['foo'])
     assert code is 0
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

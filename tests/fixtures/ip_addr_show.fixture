@@ -1,0 +1,8 @@
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether 68:f7:28:de:61:20 brd ff:ff:ff:ff:ff:ff
+    inet 11.22.33.44/16 brd 11.22.33.255 scope global dynamic eth0
+       valid_lft 1283748sec preferred_lft 1283748sec
+    inet6 2612:112:80c0:0880:3af7:28ff:fede:6120/128 scope global dynamic 
+       valid_lft 3521sec preferred_lft 1721sec
+    inet6 ff81::6af7:28ff:fede:6120/64 scope link 
+       valid_lft forever preferred_lft forever
