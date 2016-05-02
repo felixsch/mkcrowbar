@@ -1,11 +1,13 @@
 import os
 
-from plumbum          import local
-from mkcrowbar        import paths
-from mkcrowbar.pretty import fatal
+from unittest import mock
+from plumbum.machines.local import local
+from mkcrowbar import paths
 
+import pdb
 
 def network_config_valid(ipv4):
+
     path = paths.crowbar_chef_templates('network')
 
     if os.path.exists(paths.crowbar_json('network')):

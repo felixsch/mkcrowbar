@@ -1,5 +1,6 @@
 plumbum
 PyYAML
 pytest
+mock
 tox
 

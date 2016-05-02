@@ -2,6 +2,9 @@ from pytest import raises
 
 from mkcrowbar import pretty
 
+import pdb
+import time
+
 
 def test_say(capsys):
     pretty.say('foo')
@@ -54,12 +57,15 @@ def test_step_task_interactive(capsys):
 
 def test_step_task(capsys):
 
+
     with pretty.step('Topic', indent=0, interactive=False) as s:
         s.task('a task')
 
     out, _ = capsys.readouterr()
 
-    assert out == ' Topic... \n  # a task \n'
+    assert 'Topic...' in out
+    assert '# a task' in out
+    assert '✓ a task' in out
 
 
 def test_note(capsys):
@@ -70,14 +76,44 @@ def test_note(capsys):
 
     out, _ = capsys.readouterr()
 
-    assert out == ' Topic... \n  # a task \n    ::  a note \n'
+    assert 'Topic...' in out
+    assert '# a task' in out
+    assert '✓ a task' in out
+    assert 'a note' in out
 
-def test_done_interactive(capsys):
-
-    with pretty.step('Topic', indent=0, interactive=True) as s:
+def test_done(capsys):
+    with pretty.step('Topic', indent=0) as s:
         s.task('a task')
         s.done('its done')
 
     out, _ = capsys.readouterr()
 
-    assert 'its done' in out
+    assert 'Topic...' in out
+    assert '# a task' in out
+    assert '✓ a task [its done]' in out
+
+def test_fail(capsys):
+
+    with raises(SystemExit):
+        with pretty.step('Topic', indent=0) as s:
+            s.task('a task')
+            s.fail('failed')
+
+    out, err = capsys.readouterr()
+
+    assert 'Topic...' in out
+    assert '# a task' in out
+    assert '==> failed' in err
+
+
+def test_success(capsys):
+
+    with pretty.step('Topic', indent=0) as s:
+        s.task('a task')
+        s.success('success')
+
+    out, _ = capsys.readouterr()
+
+    assert 'Topic...' in out
+    assert '# a task' in out
+    assert '==> success' in out
