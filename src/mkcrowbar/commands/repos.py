@@ -27,8 +27,6 @@ class Repos(base.App):
                 s.task('Prepairing {repo} ({version})...'.format(repo=repo['name'], version=repo['version']))
                 if repo['type'] == 'nfs':
                     self.mount_nfs(s, repo)
-                elif repo['type'] == 'rsync':
-                    self.rsync_repo(s, repo)
                 elif repo['type'] == 'createrepo':
                     self.create_repo(s, repo)
                 else:
@@ -75,9 +73,6 @@ class Repos(base.App):
         if status[0] == 0:
             return True
         return False
-
-    def rsync_repo(self, step, repo):
-        pass
 
     def create_repo(self, step, repo):
         version = repo['version']

@@ -20,10 +20,7 @@ class Prepare(base.App):
 
         # use SUSEConnect or add repositories manually
         say('Enable sources for installation...')
-        if self.config.get('use-connect', False):
-            self.enable_products()
-        else:
-            self.enable_media()
+        self.enable_media()
 
         info('Your host is now prepared for crowbar.')
         info('You can now run mkcrowbar install <config>.')
@@ -123,6 +120,3 @@ class Prepare(base.App):
                 s.fail('Could not refresh database... ({})'.format(status[2]))
 
             s.success('Media/Repositories successfully enabled')
-
-    def enable_products(self):
-        pass
