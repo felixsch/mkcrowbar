@@ -1,0 +1,8 @@
+# Intel Corporation 82573E Gigabit Ethernet Controller (Copper)
+DEVICE=eth0
+BOOTPROTO=static
+DHCPCLASS=
+HWADDR=00:30:48:56:A6:2E
+IPADDR=192.168.1.10
+NETMASK=255.255.255.0
+ONBOOT=yes

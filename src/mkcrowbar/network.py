@@ -48,8 +48,8 @@ def iface_set_static_addr(iface, cfg):
 
 
 def iface_stop(iface):
-    ifup = local['ifdown'][iface]
-    status = ifup.run(retcode=None)
+    ifdown = local['ifdown'][iface]
+    status = ifdown.run(retcode=None)
     if not status[0] == 0:
         return False
     return True

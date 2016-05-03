@@ -1,10 +1,9 @@
 import pytest
 import os
-
+import builtins
 """
 Implement some test utility functionality. Mostly to test plumbum command based stuff
 """
-
 
 class LocalCommands():
     """
@@ -13,6 +12,7 @@ class LocalCommands():
 
     def __init__(self):
         self.registered = {}
+        self.env = {}
 
     def has(self, command, func):
         self.registered[command] = func
@@ -39,11 +39,14 @@ class LocalCommand():
         self.call = func
 
     def __getitem__(self, args):
-        self.args = args
+        if not isinstance(args, (list, tuple)):
+            self.args += [args]
+        else:
+            self.args += list(args)
         return self
 
     def __call__(self, *args):
-        self.args += args
+        self.__getitem__(args)
         return self.run()
 
     def run(self, **args):
@@ -61,6 +64,44 @@ class Stub():
 
     def exec(self, command, *args):
         return self.func(command, *args)
+
+
+class StubOpen():
+    """
+    Fake a file handle
+    """
+    def __init__(self, monkeypatch=None, func=None):
+        self.content = []
+        self.func = func
+        self.real_open = builtins.open
+        self.patch = monkeypatch
+        self.args = []
+
+    def read(self):
+        if not self.func:
+            pytest.fail('Could not call defined function. No wrapper defined')
+
+        self.patch.setattr('builtins.open', self.real_open)
+        result = self.func.exec('open', *self.args)
+        self.patch.setattr('builtins.open', self)
+        return result
+
+
+    def write(self, line):
+        self.content += [line]
+
+    def __call__(self, args):
+        self.args = args
+        return self
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+    def result(self):
+        return self.content
 
 
 def return_ok(stdout="No message", returncode=0, expect=None):
@@ -81,7 +122,7 @@ def return_error(stderr="No message", returncode=1, expect=None):
     def error(command, *args):
         if expect:
             expect(*args)
-            return (returncode, "", command + ": " + stderr)
+        return (returncode, "", command + ": " + stderr)
     return Stub(error)
 
 
@@ -94,7 +135,7 @@ def raise_error(error):
     return Stub(raise_)
 
 
-def has_args(required, data=None):
+def expect_args(required, data=None):
     """
     checks if a command was called with some arguments
     """

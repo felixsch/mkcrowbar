@@ -1,11 +1,11 @@
 from functools import partial
 from mkcrowbar import zypper
 
-from fake import LocalCommand, LocalCommands, has_args, return_ok
+from fake import LocalCommand, LocalCommands, expect_args, return_ok
 
 
 def stub_cmd(required, *args):
-    cmd = LocalCommand('zypper', has_args(required, return_ok()))
+    cmd = LocalCommand('zypper', expect_args(required, return_ok()))
     cmd[args]
     return cmd
 
@@ -16,7 +16,7 @@ def test_cmd(monkeypatch):
 
     args = ['--non-interactive', '--no-gpg-checks']
 
-    local.has('zypper', has_args(args, return_ok()))
+    local.has('zypper', expect_args(args, return_ok()))
 
     update = zypper.cmd('update')
 

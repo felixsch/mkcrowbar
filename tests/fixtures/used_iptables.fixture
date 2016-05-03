@@ -1,0 +1,19 @@
+-P INPUT DROP
+-P FORWARD DROP
+-P OUTPUT ACCEPT
+-N forward_ext
+-N input_ext
+-N reject_func
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m conntrack --ctstate ESTABLISHED -j ACCEPT
+-A INPUT -p icmp -m conntrack --ctstate RELATED -j ACCEPT
+-A INPUT -j input_ext
+-A INPUT -m limit --limit 3/min -j LOG --log-prefix "SFW2-IN-ILL-TARGET " --log-tcp-options --log-ip-options
+-A INPUT -j DROP
+-A FORWARD -m limit --limit 3/min -j LOG --log-prefix "SFW2-FWD-ILL-ROUTING " --log-tcp-options --log-ip-options
+-A OUTPUT -o lo -j ACCEPT
+-A input_ext -m pkttype --pkt-type broadcast -j DROP
+-A input_ext -p icmp -m icmp --icmp-type 4 -j ACCEPT
+-A input_ext -p icmp -m icmp --icmp-type 8 -j ACCEPT
+-A input_ext -p tcp -m limit --limit 3/min -m tcp --dport 22000 --tcp-flags FIN,SYN,RST,ACK SYN -j LOG --log-prefix "SFW2-INext-ACC-TCP " --log-tcp-options --log-ip-options
+-A input_ext -p tcp -m tcp --dport 22000 -j ACCEPT
