@@ -24,7 +24,7 @@ class Repos(base.App):
                 if 'version' not in repo:
                     s.fail('Missing version specification. Your need to add a version for {}'.format(repo['name']))
 
-                s.task('Prepairing {repo} ({version})...'.format(repo=repo['name'], version=repo['version']))
+                s.task('Preparing {repo} ({version})...'.format(repo=repo['name'], version=repo['version']))
                 if repo['type'] == 'nfs':
                     self.mount_nfs(s, repo)
                 elif repo['type'] == 'createrepo':
