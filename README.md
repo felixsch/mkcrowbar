@@ -39,6 +39,7 @@ You can run all steps at once by omitting the subcommand
 
     mkcrowbar example-env.yaml
 
+The order is: install, prepare, checks, repos, setup.
 
 
 ## configure the environment
