@@ -35,10 +35,11 @@ Subcommands:
     repos                  Configures the install repos for crowbar clients
     setup                  bootstrap and configure crowbar
 ```
-You can run all steps at one by omitting the subcommand
+You can run all steps at once by omitting the subcommand
 
     mkcrowbar example-env.yaml
 
+The order is: install, prepare, checks, repos, setup.
 
 
 ## configure the environment

@@ -40,7 +40,7 @@ class Install(base.App):
             self.show("Removing packages = {}".format(remove))
             status = zypper.remove(remove)
 
-            if not status[0] == 0:
+            if status[0] != 0 and status[0] != 104:
                 s.fail('Could not remove conflicting packages', exit=False)
                 s.fail(status[1])
             s.done('Conflicting packages removed')
