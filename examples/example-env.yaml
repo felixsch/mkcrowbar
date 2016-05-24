@@ -1,5 +1,5 @@
 # The SUSE product your want to install
-product: storage
+installation: storage
 
 # example-env.yaml
 # Specify a fully qualified hostname for the admin node
@@ -23,18 +23,7 @@ network:
     #ipv6addr: 2607:f0d0:1002:0011:0000:0000:0000:0002
     #ipv6_defaultgw: 2607:f0d0:1002:0011:0000:0000:0000:0001
 
-
-# Configure repositories for crowbar via SUSEConnect
-use-connect: false
-# You need to add required regcodes unless you alread registered
-# the host
-# products:
-#   - regcode
-#   - regcode
-#   - regcode
-
-
-# Configure repositories via zyppera
+# Configure repositories via zypper
 use-zypper: true
 # Define installation medias from where to install crowbar
 # - <URL>.repo
@@ -62,7 +51,6 @@ crowbar-components:
 #   type: nfs                   Nfs mount
 #   version: <version>          Server version (e.g suse-12.1 or suse-12.0)
 #   source: <nfs server share>  Source of the nfs share
-#   fstab: true | false         Add a line to /etc/fstab to automatically mount nfs share
 #
 # createrepo - Create a empty repo (for use with SUSE Manager)
 #   NOTE: You need to sign the repository manually
@@ -78,22 +66,18 @@ repositories:
     type: nfs
     version: suse-12.0
     source: somehost:/data/repos/sle-12/dvd1
-    fstab: true
 
   - name: Cloud
     type: nfs
     version: suse-12.0
     source: somehost:/data/repos/cloud-6/dvd1
-    fstab: true
 
   - name: SLES12-Pool
     type: nfs
     version: suse-12.0
     source: somehost:/data/repos/sle-12-pool
-    fstab: true
 
   - name: SLES12-Updates
     type: nfs
     version: suse-12.0
     source: somehost:/data/repos/sle-12-update
-    fstab: true
