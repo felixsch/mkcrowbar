@@ -61,6 +61,10 @@ timezone: Europe/Berlin
 # Specify which network interface to use for the admin network
 interface: eth1
 
+# Just check if the ip is correct. Do not update configuration or check if ip is
+# static
+only-checks: False
+
 # network configuration for the crowbar host. You can set settings according to
 # the Interface Configuration Files. 
 # HINT: If you want to use ipv6, you need to set NETWORKING_IPV6 in /etc/sysconfig/network

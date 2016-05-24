@@ -24,7 +24,7 @@ def load(path=None):
 
 
 def validate(config):
-    required = ['hostname', 'interface']
+    required = ['hostname', 'interface', 'network']
 
     for key in required:
         if key not in config:

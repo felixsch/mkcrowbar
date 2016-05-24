@@ -15,7 +15,7 @@ class Prepare(base.App):
         # ip
         say('Configure ip adress...')
         iface = self.config.get('interface', 'eth0')
-        if not self.check_ip(iface) and self.config['network']:
+        if not self.check_ip(iface) and not self.config.get('only-checks', False):
             self.set_ip(iface)
 
         # use SUSEConnect or add repositories manually
@@ -33,7 +33,7 @@ class Prepare(base.App):
             info(' Current ip address is: {}'.format(addr))
             return False
 
-        if network.iface_uses_dhcp(iface):
+        if not self.config.get('only-checks', False) and network.iface_uses_dhcp(iface):
             info('Interface {} is configured to use dhcp. Need to switch to a static ip address'.format(iface))
             return False
         return True
