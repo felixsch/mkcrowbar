@@ -72,7 +72,7 @@ class Setup(base.App):
             self.exec()
 
     def run_installer_process(self):
-        return subprocess.Popen(paths.crowbar_installer() + " --verbose",
+        return subprocess.Popen(paths.crowbar_installer() + " --verbose --crowbar",
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 stdin=subprocess.PIPE,
