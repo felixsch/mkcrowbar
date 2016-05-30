@@ -46,7 +46,7 @@ class Install(base.App):
             s.done('Conflicting packages removed')
 
     def select_packages(self):
-        install = ['crowbar', 'sqlite3', 'crowbar-core', 'ntp']
+        install = ['crowbar', 'sqlite3', 'crowbar-core', 'ntp', 'nfs-client']
         remove = []
 
         if self.config['installation'] == 'storage':
